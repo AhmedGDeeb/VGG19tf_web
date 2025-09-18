@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction History - Pneumonia Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .navigation {
+            background: #f8f9fa;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .predictions {
+            padding: 30px;
+        }
+        
+        .predictions h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+        
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .prediction-card {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+        
+        .result-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .result-pneumonia {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+        
+        .result-normal {
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            color: white;
+        }
+        
+        .confidence {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .image-container {
+            margin: 15px 0;
+            text-align: center;
+        }
+        
+        .prediction-image {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-details {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .timestamp {
+            color: #adb5bd;
+            font-size: 0.8em;
+            margin-top: 10px;
+            text-align: right;
+        }
+        
+        .no-predictions {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .no-predictions i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .page-btn {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .prediction-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Prediction History</h1>
+            <p>Review all previous pneumonia detection results</p>
+        </div>
+        
+        <div class="navigation">
+            <a href="/" class="nav-btn">🏠 Home</a>
+            <a href="/predict/" class="nav-btn">📤 New Analysis</a>
+            <button class="nav-btn" onclick="location.reload()">🔄 Refresh</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_predictions }}</div>
+                <div class="stat-label">Total Predictions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ pneumonia_count }}</div>
+                <div class="stat-label">Pneumonia Cases</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ normal_count }}</div>
+                <div class="stat-label">Normal Cases</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ accuracy }}%</div>
+                <div class="stat-label">Average Confidence</div>
+            </div>
+        </div>
+        
+        <div class="predictions">
+            <h2>📋 Recent Predictions</h2>
+            
+            {% if predictions %}
+            <div class="prediction-grid">
+                {% for prediction in predictions %}
+                <div class="prediction-card">
+                    <div class="card-header">
+                        <span class="result-badge {% if prediction.result == 'Pneumonia' %}result-pneumonia{% else %}result-normal{% endif %}">
+                            {{ prediction.result }}
+                        </span>
+                        <span class="confidence">{{ prediction.confidence|floatformat:2 }}%</span>
+                    </div>
+                    
+                    <div class="image-container">
+                        <img src="{{ prediction.image.url }}" alt="X-Ray Image" class="prediction-image" 
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5JbWFnZSBub3QgZm91bmQ8L3RleHQ+PC9zdmc+'">
+                    </div>
+                    
+                    <div class="card-details">
+                        <p><strong>ID:</strong> #{{ prediction.id }}</p>
+                        <p><strong>Confidence:</strong> {{ prediction.confidence|floatformat:4 }}</p>
+                        <p><strong>Date:</strong> {{ prediction.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    
+                    <div class="timestamp">
+                        Analyzed {{ prediction.created_at|timesince }} ago
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="no-predictions">
+                <div>📭</div>
+                <h3>No predictions yet</h3>
+                <p>Upload your first X-ray image to get started!</p>
+                <a href="/predict/" class="nav-btn" style="margin-top: 20px;">Start Analyzing</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effect to cards
+            const cards = document.querySelectorAll('.prediction-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+            
+            // Auto-refresh every 30 seconds if needed
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    const refreshBtn = document.querySelector('[onclick="location.reload()"]');
+                    if (refreshBtn) {
+                        refreshBtn.innerHTML = '🔄 Refresh (auto soon)';
+                    }
+                }
+            }, 25000);
+            
+            // Simple filter functionality
+            const filterResults = (resultType) => {
+                const cards = document.querySelectorAll('.prediction-card');
+                cards.forEach(card => {
+                    const badge = card.querySelector('.result-badge');
+                    if (resultType === 'all' || badge.textContent === resultType) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            };
+        });
+    </script>
+</body>
+</html>

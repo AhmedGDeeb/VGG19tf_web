@@ -1,0 +1,100 @@
+<!-- prediction/templates/prediction/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pneumonia Detection</title>
+    <style>
+        .container { max-width: 600px; margin: 50px auto; text-align: center; }
+        .error { color: red; margin: 10px 0; }
+        .success { color: green; margin: 10px 0; }
+        #loading { display: none; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pneumonia Detection from X-Ray</h1>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Analyze X-Ray</button>
+        </form>
+
+        <div id="loading">
+            <p>Analyzing image...</p>
+        </div>
+
+        <div id="error" class="error"></div>
+        <div id="result" style="display: none;">
+            <h2>Result:</h2>
+            <p id="resultText"></p>
+            <p id="confidence"></p>
+            <img id="previewImage" style="max-width: 300px; margin-top: 20px;">
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            
+            // Reset UI
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            try {
+                const response = await fetch('/predict/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest' // This tells Django it's AJAX
+                    }
+                });
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response');
+                }
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error');
+                }
+                
+                if (data.success) {
+                    // Display results
+                    document.getElementById('resultText').textContent = data.message;
+                    document.getElementById('confidence').textContent = 
+                        `Confidence: ${(data.confidence * 100).toFixed(2)}%`;
+                    
+                    // Create preview
+                    const fileInput = document.querySelector('input[type="file"]');
+                    if (fileInput.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('previewImage').src = e.target.result;
+                        };
+                        reader.readAsDataURL(fileInput.files[0]);
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Prediction failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = 'Error: ' + error.message;
+            } finally {
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
