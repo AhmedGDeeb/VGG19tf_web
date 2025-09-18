@@ -1,3 +1,17 @@
+# hide venv files
+Script/
+Lib/
+Include/
+Share/
+bin/
+
+# hide all files and folders starting with .
+.*
+.*/
+
+# server settings
+*/settings.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
