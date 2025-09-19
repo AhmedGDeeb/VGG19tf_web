@@ -2,24 +2,5 @@
 A web deployment with django for VGG 19 model with transfer learning
 
 # usage
-## curl post
-```bash
-curl -X POST -F "image=@xray.jpg" http://localhost:8000/predict/
-```
-
-## python
-```py
-import requests
-
-url = "http://localhost:8000/predict/"
-files = {"image": open("xray.jpg", "rb")}
-response = requests.post(url, files=files)
-print(response.json())
-```
-## curl API
-```bash
-curl -X POST -H "Content-Type: application/json" \
-     -d '{"image": "base64_encoded_image"}' \
-     http://localhost:8000/predict/
-```
-
+- navigate to [home page](https://ahmadghdeeb.pythonanywhere.com/),upload your image and click analysis
+<img width="427" height="606" alt="image" src="https://github.com/user-attachments/assets/59106d90-d56e-4a07-9e47-db1d0c28d643" />
